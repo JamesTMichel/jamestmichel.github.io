@@ -1,0 +1,192 @@
+<!DOCTYPE HTML>
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Intro to Code Review</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<link rel="stylesheet" href="assets/css/main.css" />
+	</head>
+	<body class="is-preload">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+
+							<!-- Header -->
+							<header id="header">
+								<a href="index.html" class="logo"><strong>James Michel</a>
+								<ul class="icons">
+									<li><a href="https://www.linkedin.com/in/micheljt" class="icon brands fa-linkedin"><span class="label">LinkedIn</span></a></li>
+								</ul>
+							</header>
+
+							<!-- Content -->
+								<section>
+									<header class="main">
+										<h1>Introduction to Code Review</h1>
+									</header>
+
+									<span class="image main"><img src="images/codereview/hardcoded.png" alt="" /></span>
+
+									<p>Code reivew is an integral part of application security. Ensuring that devlopers are writting and releasing code that cannot be exploited ensures security and integrity for the users of the application and the company itself. PenTesterLab has supplied a vulnerable application, allowing for code review in a controlled environment. Since the application is small, a code review can be done by manually reviewing each file. I identified the following misconfigurations and the list may not be complete. 
+										
+									<p>This lab can be found <a href="https://pentesterlab.com/exercises/codereview/course">here</a> </p>
+									<hr class="major" />
+
+									<h2>Deploy.sql</h2>
+									<span class="image fit"><img src="images/codereview/hardcoded.png" alt="" /></span>
+									<p>Deploy.sql has the login values for admin hard coded into the file. This shouldn't be visable in the root directory and can be used for admin access to the database.</p>
+
+
+									<hr class="major" />
+
+									<h2>index.php</h2>
+									<span class="image fit"><img src="images/codereview/index.png" alt="" /></span>
+
+									<p>There are multiple misconfigurations in the classes/index.php file that could be exploited.
+										<ul>
+											<li>If the user cookie is set, that is used for authentication. If the admin cookie is spoofed, the attacker would be logged in as admin.</li>
+											<li>There is a form to submit a file, but only as a pdf. Content-type is not set to verify that the file matches the requested type.</li>
+											<li>The file phpfix.php has a function, h(), that calls the htmlentities list to sanitize html characters. This does not do anything to santize SQL inputs and allows the application to be vulnerable to SQL injection attacks</li>
+										</ul>
+
+									<hr class="major" />
+
+									<h2>login.php</h2>
+									<span class="image fit"><img src="images/codereview/cookies.png" alt="" /></span>
+									<p>Login.php has one major issue that I noticed. The "setcookies" function does not use "secure" or "HttpOnly" flag. These flags prevent the user cookie from being observed and used in a replay attack to gain unauthorized access.</p>
+
+									<hr class="major" />
+
+									<h2>classes/db.php</h2>
+									<span class="image fit"><img src="images/codereview/mysql.png" alt="" /></span>
+									<p>The classes/db.php file has the mysql server credentials hard coded in the file. This allows for unauthorized access.</p>
+
+									<hr class="major" />
+
+									<h2>classes/jwt.php</h2>
+									<span class="image fit"><img src="images/codereview/jwt.png" alt="" /></span>
+									<p>The classes/jwt.php also has hardcoded credentials in the file. It also uses a hash instead of a HMAC for the signature. This allows for a Length Extension attack.
+
+										<hr class="major" />
+
+										<h2>classes/user.php</h2>
+										<span class="image fit"><img src="images/codereview/user.png" alt="" /></span>
+										<p>The addfile function in this php file checks to make sure the file name contains ".pdf" to ensure it is a valid file. The issue lies with the regex, which doesn't include the "$" character to ensure that .pdf is that the end of the file name. This allows an attacker to upload "maliciousfile.pdf.php" to the application directory as a valid file. </p>
+										<p>The getfiles function is also insecure. This function returns all of the files in a directory "files/.$user", but removes the ".." and "." listings. If an attacker attemps to get all the files for a user named "../.." or "../admin", they would be able to view file directories that should be confidential.</p>
+								</section>
+
+						</div>
+					</div>
+
+				<!-- Sidebar -->
+					<div id="sidebar">
+						<div class="inner">
+
+							<!-- Search -->
+								<section id="search" class="alt">
+									<form method="post" action="#">
+										<input type="text" name="query" id="query" placeholder="Search" />
+									</form>
+								</section>
+
+							<!-- Menu -->
+								<nav id="menu">
+									<header class="major">
+										<h2>Menu</h2>
+									</header>
+									<ul>
+										<li><a href="index.html">Homepage</a></li>
+										<li><a href="generic.html">Generic</a></li>
+										<li><a href="elements.html">Elements</a></li>
+										<li>
+											<span class="opener">Submenu</span>
+											<ul>
+												<li><a href="#">Lorem Dolor</a></li>
+												<li><a href="#">Ipsum Adipiscing</a></li>
+												<li><a href="#">Tempus Magna</a></li>
+												<li><a href="#">Feugiat Veroeros</a></li>
+											</ul>
+										</li>
+										<li><a href="#">Etiam Dolore</a></li>
+										<li><a href="#">Adipiscing</a></li>
+										<li>
+											<span class="opener">Another Submenu</span>
+											<ul>
+												<li><a href="#">Lorem Dolor</a></li>
+												<li><a href="#">Ipsum Adipiscing</a></li>
+												<li><a href="#">Tempus Magna</a></li>
+												<li><a href="#">Feugiat Veroeros</a></li>
+											</ul>
+										</li>
+										<li><a href="#">Maximus Erat</a></li>
+										<li><a href="#">Sapien Mauris</a></li>
+										<li><a href="#">Amet Lacinia</a></li>
+									</ul>
+								</nav>
+
+							<!-- Section -->
+								<section>
+									<header class="major">
+										<h2>Ante interdum</h2>
+									</header>
+									<div class="mini-posts">
+										<article>
+											<a href="#" class="image"><img src="images/pic07.jpg" alt="" /></a>
+											<p>Aenean ornare velit lacus, ac varius enim lorem ullamcorper dolore aliquam.</p>
+										</article>
+										<article>
+											<a href="#" class="image"><img src="images/pic08.jpg" alt="" /></a>
+											<p>Aenean ornare velit lacus, ac varius enim lorem ullamcorper dolore aliquam.</p>
+										</article>
+										<article>
+											<a href="#" class="image"><img src="images/pic09.jpg" alt="" /></a>
+											<p>Aenean ornare velit lacus, ac varius enim lorem ullamcorper dolore aliquam.</p>
+										</article>
+									</div>
+									<ul class="actions">
+										<li><a href="#" class="button">More</a></li>
+									</ul>
+								</section>
+
+							<!-- Section -->
+								<section>
+									<header class="major">
+										<h2>Get in touch</h2>
+									</header>
+									<p>Sed varius enim lorem ullamcorper dolore aliquam aenean ornare velit lacus, ac varius enim lorem ullamcorper dolore. Proin sed aliquam facilisis ante interdum. Sed nulla amet lorem feugiat tempus aliquam.</p>
+									<ul class="contact">
+										<li class="icon solid fa-envelope"><a href="#">information@untitled.tld</a></li>
+										<li class="icon solid fa-phone">(000) 000-0000</li>
+										<li class="icon solid fa-home">1234 Somewhere Road #8254<br />
+										Nashville, TN 00000-0000</li>
+									</ul>
+								</section>
+
+							<!-- Footer -->
+								<footer id="footer">
+									<p class="copyright">&copy; Untitled. All rights reserved. Demo Images: <a href="https://unsplash.com">Unsplash</a>. Design: <a href="https://html5up.net">HTML5 UP</a>.</p>
+								</footer>
+
+						</div>
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/browser.min.js"></script>
+			<script src="assets/js/breakpoints.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
